@@ -1,0 +1,23 @@
+
+---
+
+## 🎬 Roteiro para vídeo gerencial (pitch de até 3 min)
+
+```text
+🎯 [0:00–0:20] – Apresentação
+"Olá! Eu sou [Seu Nome], e vou apresentar uma IA que desenvolvi para apoiar o processo de recrutamento da Decision, dentro do desafio do Datathon POSTECH."
+
+🧠 [0:20–0:45] – Problema + Solução
+"O desafio era ajudar os hunters a priorizar candidatos com maior potencial. Para isso, criei uma inteligência artificial que aprendeu com os dados históricos da própria empresa – analisando CVs e marcando padrões em quem foi realmente contratado."
+
+⚙️ [0:45–1:20] – Como funciona
+"Utilizei três bases fornecidas: vagas, prospecções e candidatos. Extraí informações técnicas como tecnologias mencionadas e um nível técnico calculado. Com isso, treinei um modelo que estima a chance de contratação com base nesses padrões."
+
+🖥️ [1:20–2:00] – Demonstração do app
+"Também desenvolvi uma interface interativa em Streamlit. O usuário responde perguntas objetivas — como experiência técnica, ferramentas dominadas, certificações — e a IA retorna a chance de contratação prevista. Tudo com poucos segundos de resposta."
+
+🚀 [2:00–2:30] – Impacto e benefícios
+"Essa IA pode economizar horas de triagem, padronizar critérios técnicos e aumentar a assertividade dos hunters na seleção. É simples, rápido e totalmente interpretável."
+
+🙌 [2:30–3:00] – Encerramento
+"Obrigado pela oportunidade. Foi um prazer participar desse desafio, unindo dados, IA e impacto real em recrutamento!"
