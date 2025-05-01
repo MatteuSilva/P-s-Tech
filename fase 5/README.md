@@ -49,6 +49,7 @@ project_root/
    ```bash
    python -m venv .venv
    # Windows (PowerShell)
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
    .\.venv\Scripts\Activate.ps1
    # Linux/macOS
    source .venv/bin/activate
