@@ -1,40 +1,152 @@
-# IA para Otimização de Recrutamento – Datathon POSTECH & Decision
+# Recomendador de Candidatos
 
-Este projeto foi desenvolvido para o desafio Datathon Fase 5, com o objetivo de criar uma **Inteligência Artificial que simula o trabalho de um entrevistador técnico**, auxiliando hunters a priorizar os melhores candidatos com base em seu currículo.
+Este projeto implementa um **MVP** de recomendação de candidatos para vagas de TI, usando:
 
-## 📂 Estrutura dos Dados
+- **NLP** (TF-IDF + similaridade cosseno) para casar descrições de vagas com currículos.
+- **Streamlit** para criar uma interface web interativa.
 
-O projeto utiliza três bases principais em formato JSON:
+---
 
-- `vagas.json` – Informações sobre as vagas, como cliente, requisitos técnicos e idioma.
-- `prospects.json` – Situação dos candidatos em cada vaga (ex: contratado, encaminhado, desistente).
-- `applicants.json` – Dados dos candidatos, como formação, conhecimentos técnicos e CV completo.
+## Estrutura do Projeto
 
-## 🧠 Modelo de Machine Learning
+```
+project_root/
+├── data/                      # JSONs originais (vagas, prospects, applicants)
+│   ├── vagas.json
+│   ├── prospects.json
+│   └── applicants.json
+├── src/                       # Código-fonte
+│   ├── data_loader.py        # Carregamento e normalização dos JSONs
+│   ├── preprocess.py         # Limpeza de texto dos currículos (cv_pt/cv_en)
+│   ├── feature_engineering.py# Vetorização TF-IDF e similaridade de texto
+│   ├── model.py              # Treino e avaliação de modelo simples (RandomForest)
+│   └── app.py                # Interface Streamlit
+├── requirements.txt          # Dependências Python
+└── README.md                 # Este arquivo
+```
 
-Utilizamos um modelo de classificação `LogisticRegression` treinado com:
+---
 
-- `tecnologias_mencionadas` no CV
-- `nível técnico` (derivado da quantidade de tecnologias)
-  
-Essas features são ponderadas e combinadas para prever a **chance de contratação** com base em padrões históricos da Decision.
+## Pré-requisitos
 
-## 💻 Aplicativo Streamlit
+- Python 3.8 ou superior
+- Git (opcional)
+- Conexão com a internet para baixar recursos NLTK pela primeira vez
 
-O app coleta informações via perguntas guiadas, como:
+---
 
-- Cargo atual  
-- Experiência técnica  
-- Ferramentas dominadas  
-- Certificações, inglês e formação  
+## Instalação e Setup
 
-E então estima a chance de contratação do candidato com base em seus atributos técnicos.
+1. **Clone** este repositório ou faça download dos arquivos:
 
-## 🏁 Execução
+   ```bash
+   git clone https://seu-repo.git project_root
+   cd project_root
+   ```
+
+2. **Crie e ative** um ambiente virtual (recomendado):
+
+   ```bash
+   python -m venv .venv
+   # Windows (PowerShell)
+   .\.venv\Scripts\Activate.ps1
+   # Linux/macOS
+   source .venv/bin/activate
+   ```
+
+3. **Instale** as dependências:
+
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+4. **Baixe** recursos do NLTK (executar uma vez):
+
+   ```bash
+   python -c "import nltk; nltk.download('stopwords'); nltk.download('wordnet')"
+   ```
+
+5. **Configure** os arquivos JSON em `data//`. Se usar Git LFS ou DVC, verifique se os ponteiros estão corretos e os dados foram baixados.
+
+---
+
+## Como Executar
+
+### Interface Streamlit
 
 ```bash
-# Treinar o modelo
-python scripts/train_vectorizer_and_model.py
+streamlit run src/app.py
+```
 
-# Iniciar o app
-streamlit run app/app.py
+- Abra `http://localhost:8501` no navegador.
+- **Sidebar**:
+  - Selecione uma vaga (título limpo, sem sufixo numérico).
+  - (Opcional) Marque **Treinar modelo agora** para reapreender a partir do histórico de `prospects`.
+  - Filtre por **Skills obrigatórias** (Python, AWS, Docker, etc.).
+
+### Script Manual de Treino
+
+Caso queira gerar `model.pkl` e `vectorizer.pkl` fora do Streamlit:
+
+```bash
+python - <<EOF
+from src.data_loader import load_all
+from src.preprocess import preprocess_applicants
+from src.feature_engineering import vectorize_resumes
+from src.model import train_model
+import pickle
+
+# Carrega dados
+data = load_all('data')
+pros = data['prospects']
+apps = preprocess_applicants(data['applicants'])
+
+# Junta histórico e treina
+pros_flat = pros.explode('prospects')
+merged = pd.json_normalize(pros_flat['prospects']).merge(
+    apps, left_on='codigo', right_on='infos_basicas.codigo_profissional'
+)
+X, vect = vectorize_resumes(merged)
+y = merged['situacao_candidado'].apply(lambda s: 1 if str(s).lower() in ['hired','contratado'] else 0)
+model = train_model(X.toarray(), y)
+
+# Salva
+pickle.dump(model, open('model.pkl','wb'))
+pickle.dump(vect, open('vectorizer.pkl','wb'))
+print("Artefatos salvos.")
+EOF
+```
+
+---
+
+## Como Funciona
+
+1. **data\_loader.py**: normaliza JSONs, convertendo dicionários em listas de registros.
+2. **preprocess.py**: limpa `cv_pt` / `cv_en`, aplica stopwords e lemmatização.
+3. **feature\_engineering.py**: vetoriza currículos e descrição de vagas via TF-IDF; calcula similaridade cosseno.
+4. **model.py**: treina um `RandomForestClassifier` sobre o histórico de candidatos contratados vs. não.
+5. **app.py**: UI em Streamlit que combina:
+   - Seleção de vaga e extração de descrição.
+   - Filtro por skills.
+   - Treino/reload de modelo.
+   - Ranking de candidatos por `match_score`.
+
+---
+
+## Possíveis Melhorias
+
+- Boost por contagem exata de skills encontradas.
+- Filtrar candidatos pelo objetivo/título profissional.
+- Incorporar certificações ao corpus de vetorização.
+- Ajustar pesos entre similaridade textual e modelo supervisionado.
+- Dashboard de análises (métricas de precisão, recall, etc.).
+
+---
+
+## Licença e Contribuição
+
+Sinta-se à vontade para abrir issues ou pull requests. Este projeto está liberado sob licença MIT.
+
+
+
