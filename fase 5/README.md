@@ -53,6 +53,8 @@ project_root/
    .\.venv\Scripts\Activate.ps1
    # Linux/macOS
    source .venv/bin/activate
+   # Para desativaro venv
+   deactivate
    ```
 
 3. **Instale** as dependências:
