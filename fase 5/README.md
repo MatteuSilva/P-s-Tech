@@ -150,6 +150,3 @@ EOF
 ## Licença e Contribuição
 
 Sinta-se à vontade para abrir issues ou pull requests. Este projeto está liberado sob licença MIT.
-
-
-
